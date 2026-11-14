@@ -13,10 +13,7 @@ import Footer from './components/Footer';
 
 export default function App() {
   const [user, setUser] = useState(null);
-  const [selectedCourseId, setSelectedCourseId] = useState(null);
   const [courseId, setCourseId] = useState('');
-  
-  // Modes: 'dashboard', 'take-attendance', 'view-history'
 
   useEffect(() => {
     const savedUser = authService.getCurrentUser();
@@ -51,6 +48,6 @@ export default function App() {
   );
 }
 
-// francis.atuhairwe@univ.ac.ug
+// john.admin@univ.ac.ug
 // patricia.akello@univ.ac.ug
-// ivan.mukasa@univ.ac.ug
+// ivanmukasa@univ.ac.ug
