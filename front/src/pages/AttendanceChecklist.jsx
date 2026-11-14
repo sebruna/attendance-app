@@ -49,7 +49,7 @@ export default function AttendanceChecklist() {
     const startClass = async () => {
         try {
             const today = new Date().toISOString().split('T')[0];
-            const sessionResponse = await api.post('/attendance/otp/generate', { courseId, sessionDate: today });
+            const sessionResponse = await api.post('/attendance/session/new', { courseId, sessionDate: today });
             const { sessionId } = sessionResponse.data;
             setSessionId(sessionId);
             localStorage.setItem('sessionId', sessionId);

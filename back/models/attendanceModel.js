@@ -54,10 +54,10 @@ export const AttendanceModel = {
     const values = records.map(rec => [sessionId, rec.studentId, rec.status || 'absent', 'lecturer']);
     const query = `
       INSERT INTO attendance_records (session_id, student_id, status, marked_by)
-      VALUES ?
+      VALUES ? AS new
       ON DUPLICATE KEY UPDATE 
-        status = IF(marked_by = 'otp' AND status = 'present', status, VALUES(status)),
-        marked_by = IF(marked_by = 'otp' AND status = 'present', marked_by, VALUES(marked_by))
+        status = IF(attendance_records.marked_by = 'otp' AND attendance_records.status = 'present', attendance_records.status, new.status),
+        marked_by = IF(attendance_records.marked_by = 'otp' AND attendance_records.status = 'present', attendance_records.marked_by, new.marked_by)
     `;
     const [results] = await pool.query(query, [values]);
     return results;
