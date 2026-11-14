@@ -42,10 +42,10 @@ export const AttendanceModel = {
     // Insert or update attendance record as 'present'
     const recordQuery = `
       INSERT INTO attendance_records (session_id, student_id, status, marked_by)
-      VALUES (?, ?, 'present', 'otp')
+      VALUES (?, ?, ?, ?)
       ON DUPLICATE KEY UPDATE status = 'present', marked_by = 'otp'
     `;
-    await pool.query(recordQuery, [session.id, studentId]);
+    await pool.query(recordQuery, [session.id, studentId, 'present', 'otp']);
     return { success: true, message: "Attendance marked successfully!" };
   },
 
