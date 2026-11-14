@@ -51,7 +51,7 @@ export const AttendanceModel = {
 
   // Bulk upsert attendance records checklist
   async bulkInsertRecords(sessionId, records) {
-    const values = records.map(rec => [sessionId, rec.studentId, rec.status || 'absent', 'lecturer']);
+    const values = records.map(rec => [sessionId, rec.studentId, rec.status, 'lecturer']);
     const query = `
       INSERT INTO attendance_records (session_id, student_id, status, marked_by)
       VALUES ? AS new
