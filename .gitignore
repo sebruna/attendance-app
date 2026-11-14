@@ -1,0 +1,25 @@
+# Dependencies (applies to both React and Node.js folders)
+node_modules/
+
+# Environment variables & secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# React production builds (Vite & Create React App)
+dist/
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
