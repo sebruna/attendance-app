@@ -9,6 +9,7 @@ export default function AttendanceChecklist() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
+  const [search, setSearch] = useState('');
 
   const {courseId} = useParams();
 
@@ -72,6 +73,8 @@ export default function AttendanceChecklist() {
     }
   };
 
+  const filtered = students.filter(student => student.name.toLowerCase().includes(search) || student.reg_number.toLowerCase().includes(search));
+
   if (loading) return <div className="p-6 text-center text-gray-500">Loading student sheets roster...</div>;
 
   return (
@@ -88,9 +91,19 @@ export default function AttendanceChecklist() {
         {/* OTP Generation Box layout control */}
         <OtpGenerator courseId={courseId}/>
 
+        <div className='flex items-center justify-between gap-5 border border-emerald-200 rounded-[10px]'>
+          <input 
+              className='flex-1 px-4 py-2 outline-none'
+              type="text"
+              value={search}
+              placeholder='Search student by name or reg_no...'
+              onChange={(e)=>setSearch(e.target.value)} />
+          {search && <p className='mr-5 text-[red] w-5 cursor-pointer' onClick={()=>setSearch('')}>X</p>}
+        </div>
+
         <form onSubmit={handleSubmit}>
           <div className="divide-y divide-gray-100 mb-6">
-            {students.map((student) => (
+            {filtered.map((student) => (
               <div key={student.id} className="py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                   <h4 className="font-semibold text-gray-800">{student.name}</h4>
