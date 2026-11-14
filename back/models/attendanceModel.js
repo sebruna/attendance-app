@@ -12,11 +12,11 @@ export const AttendanceModel = {
 
   // Bulk upsert attendance records checklist
   async bulkInsertRecords(sessionId, records) {
-    const values = records.map(rec => [sessionId, rec.studentId, rec.status || 'present']);
+    const values = records.map(rec => [sessionId, rec.studentId, rec.status || 'absent']);
     const query = `
       INSERT INTO attendance_records (session_id, student_id, status)
       VALUES ?
-      ON DUPLICATE KEY UPDATE status = VALUES(status)
+      ON DUPLICATE KEY UPDATE status = status
     `;
     const [result] = await pool.query(query, [values]);
     return result;
