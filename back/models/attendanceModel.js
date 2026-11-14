@@ -10,17 +10,6 @@ export const AttendanceModel = {
     return result.insertId;
   },
 
-  // Bulk upsert attendance records checklist
-  async bulkInsertRecords(sessionId, records) {
-    const values = records.map(rec => [sessionId, rec.studentId, rec.status || 'absent']);
-    const query = `
-      INSERT INTO attendance_records (session_id, student_id, status)
-      VALUES ?
-      ON DUPLICATE KEY UPDATE status = status
-    `;
-    const [result] = await pool.query(query, [values]);
-    return result;
-  },
   // 🔑 Save a generated OTP code to a session (expires in 10 minutes)
   async setSessionOTP(sessionId, otpCode) {
     const query = `
@@ -31,6 +20,7 @@ export const AttendanceModel = {
     const [result] = await pool.query(query, [otpCode, sessionId]);
     return result;
   },
+  
 
   // 🎓 Student validation check against active codes
   async verifyStudentOTP(studentId, otpCode) {
@@ -51,11 +41,25 @@ export const AttendanceModel = {
 
     // Insert or update attendance record as 'present'
     const recordQuery = `
-      INSERT INTO attendance_records (session_id, student_id, status)
-      VALUES (?, ?, 'present')
-      ON DUPLICATE KEY UPDATE status = 'present'
+      INSERT INTO attendance_records (session_id, student_id, status, marked_by)
+      VALUES (?, ?, 'present', 'otp')
+      ON DUPLICATE KEY UPDATE status = 'present', marked_by = 'otp'
     `;
     await pool.query(recordQuery, [session.id, studentId]);
     return { success: true, message: "Attendance marked successfully!" };
+  },
+
+  // Bulk upsert attendance records checklist
+  async bulkInsertRecords(sessionId, records) {
+    const values = records.map(rec => [sessionId, rec.studentId, rec.status || 'absent', 'lecturer']);
+    const query = `
+      INSERT INTO attendance_records (session_id, student_id, status, marked_by)
+      VALUES ?
+      ON DUPLICATE KEY UPDATE 
+        status = IF(marked_by = 'otp' AND status = 'present', status, VALUES(status)),
+        marked_by = IF(marked_by = 'otp' AND status = 'present', marked_by, VALUES(marked_by))
+    `;
+    const [results] = await pool.query(query, [values]);
+    return results;
   },
 };

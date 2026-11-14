@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
-const OtpGenerator = ({courseId})=>{
+const OtpGenerator = ({sessionId})=>{
 
     const [activeOTP, setActiveOTP] = useState('');
     // 🔑 Added States for Visual Countdown Sync
@@ -25,13 +25,9 @@ const OtpGenerator = ({courseId})=>{
     }, [isTimerActive, timeLeft]);
 
     const triggerOTPGeneration = async () => {
+        
         try {
-            const today = new Date().toISOString().split('T')[0];
-            const sessionResponse = await api.post('/attendance/otp/generate', { courseId, sessionDate: today });
-            const { sessionId } = sessionResponse.data;
-            
             const otpResponse = await api.post('/attendance/otp/create-code', { sessionId });
-            
             setActiveOTP(otpResponse.data.otpCode);
             setTimeLeft(600); // Reset timer tracking to 10 minutes flat
             setIsTimerActive(true); // Initiate countdown loop
@@ -67,7 +63,7 @@ const OtpGenerator = ({courseId})=>{
             ) : (
                 <button
                     type="button"
-                    onClick={triggerOTPGeneration}
+                    onClick={ triggerOTPGeneration}
                     className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-4 py-2 rounded-lg transition shrink-0"
                 >
                     🔑 Generate Check-In Code

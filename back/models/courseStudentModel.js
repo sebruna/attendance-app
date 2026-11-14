@@ -92,7 +92,7 @@ async getStudentsByCourse(courseId) {
       LEFT JOIN attendance_records r ON s.id = r.session_id
       WHERE s.course_id = ?
       GROUP BY s.id, s.session_date
-      ORDER BY s.session_date DESC
+      ORDER BY s.created_at DESC
     `;
     const [rows] = await pool.query(query, [courseId]);
     return rows;

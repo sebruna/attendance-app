@@ -10,6 +10,8 @@ export default function AttendanceChecklist() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [search, setSearch] = useState('');
+  const [sessionId, setSessionId] = useState(localStorage.getItem('sessionId') || '');
+
 
   const {courseId} = useParams();
 
@@ -23,7 +25,7 @@ export default function AttendanceChecklist() {
         // Initialize all students to 'present' by default layout rules
         const defaultStatus = {};
         response.data.forEach(student => {
-          defaultStatus[student.id] = 'absent'; // Default to 'absent' for clarity
+          defaultStatus[student.id] = 'absent';
         });
         setAttendance(defaultStatus);
       } catch (err) {
@@ -44,19 +46,24 @@ export default function AttendanceChecklist() {
     }));
   };
 
+    const startClass = async () => {
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const sessionResponse = await api.post('/attendance/otp/generate', { courseId, sessionDate: today });
+            const { sessionId } = sessionResponse.data;
+            setSessionId(sessionId);
+            localStorage.setItem('sessionId', sessionId);
+        } catch (err) {
+            console.error("Failed to generate sessionId:", err);
+        }
+    };
+
   // 5. Package and Bulk Submit Checklist
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setMessage('');
     try {
-      const today = new Date().toISOString().split('T')[0];
-      const sessionResponse = await api.post('/attendance/session/new', {
-        courseId,
-        sessionDate: today
-      });
-      const { sessionId } = sessionResponse.data;
-
       const records = Object.keys(attendance).map(studentId => ({
         studentId: parseInt(studentId),
         status: attendance[studentId]
@@ -65,6 +72,7 @@ export default function AttendanceChecklist() {
       await api.post('/attendance/submit', { sessionId, records });
      
       setMessage('🎉 Attendance synchronized and saved successfully!');
+      localStorage.removeItem('sessionId')
     } catch (err) {
       console.error("❌ Submission error:", err);
       setMessage('❌ Failed to save attendance to institutional registry.');
@@ -74,7 +82,7 @@ export default function AttendanceChecklist() {
   };
 
   const filtered = students.filter(student => student.name.toLowerCase().includes(search) || student.reg_number.toLowerCase().includes(search));
-
+  
   if (loading) return <div className="p-6 text-center text-gray-500">Loading student sheets roster...</div>;
 
   return (
@@ -85,13 +93,21 @@ export default function AttendanceChecklist() {
             <h2 className="text-2xl font-bold text-gray-800">Roll Call Checklist</h2>
             <p className="text-sm text-gray-400">Date: {new Date().toLocaleDateString()}</p>
           </div>
+          <button
+            type="button"
+            onClick={()=>{{!sessionId ? startClass(): alert('Class already started') }}}
+            className={`${!sessionId ? 'bg-emerald-600 hover:bg-emerald-700 text-white': 'bg-white hover:bg-[red]-700 text-emerald-600 border' } font-semibold text-xs px-4 py-2 rounded-lg transition shrink-0`}
+        >
+            {!sessionId ? '🔑 Start Class': 'Class Started' }
+        </button>
           {message && <span className="text-sm font-medium px-3 py-1 rounded bg-emerald-50 text-emerald-700">{message}</span>}
         </div>
+        
 
         {/* OTP Generation Box layout control */}
-        <OtpGenerator courseId={courseId}/>
+        {sessionId && <OtpGenerator sessionId={sessionId}/>}
 
-        <div className='flex items-center justify-between gap-5 border border-emerald-200 rounded-[10px]'>
+        {sessionId && <div className='flex items-center justify-between gap-5 border border-emerald-200 rounded-[10px]'>
           <input 
               className='flex-1 px-4 py-2 outline-none'
               type="text"
@@ -99,9 +115,9 @@ export default function AttendanceChecklist() {
               placeholder='Search student by name or reg_no...'
               onChange={(e)=>setSearch(e.target.value)} />
           {search && <p className='mr-5 text-[red] w-5 cursor-pointer' onClick={()=>setSearch('')}>X</p>}
-        </div>
+        </div>}
 
-        <form onSubmit={handleSubmit}>
+        {sessionId && <form onSubmit={handleSubmit}>
           <div className="divide-y divide-gray-100 mb-6">
             {filtered.map((student) => (
               <div key={student.id} className="py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -143,7 +159,7 @@ export default function AttendanceChecklist() {
           >
             {submitting ? "Synchronizing Sheet..." : "Submit Completed Roll Call"}
           </button>
-        </form>
+        </form>}
       </div>
     </div>
   );
