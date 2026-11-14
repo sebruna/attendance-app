@@ -11,7 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({origin: 'https://attendance-app-amber.vercel.app'})); // Allow all origins for development; adjust in production
 app.use(express.json()); // Essential payload parsing filtering block
 
 // Core Route Mount Points
