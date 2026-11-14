@@ -23,7 +23,7 @@ export default function AttendanceChecklist() {
         // Initialize all students to 'present' by default layout rules
         const defaultStatus = {};
         response.data.forEach(student => {
-          defaultStatus[student.id] = 'absent';
+          defaultStatus[student.id] = 'present';
         });
         setAttendance(defaultStatus);
       } catch (err) {
