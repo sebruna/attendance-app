@@ -52,7 +52,7 @@ const Dashboard = ({user})=>{
                             <Link
                               to={`/take-attendance/${course.id}`}
                               onClick={()=>localStorage.removeItem('sessionId')}
-                              className="flex-1 bg-emerald-600 text-white py-2 pl-1 md:pl-4 text-sm font-medium rounded-lg hover:bg-emerald-700 transition"
+                              className="flex-1 bg-emerald-600 text-white py-2 pl-4 text-sm font-medium rounded-lg hover:bg-emerald-700 transition"
                             >
                               Take Attendance
                             </Link>
