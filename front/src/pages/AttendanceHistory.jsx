@@ -74,7 +74,7 @@ export default function AttendanceHistory() {
           ) : (
             <div className="space-y-2">
               {sessions.map(session => (
-                <button
+                (session.total_count > 0 && <button
                   key={session.id}
                   onClick={() => handleViewReport(session.id)}
                   className={`w-full text-left p-3 rounded-lg text-sm transition-all border ${
@@ -87,7 +87,7 @@ export default function AttendanceHistory() {
                   <p className="text-xs text-gray-400 mt-0.5">
                     Attended: {session.present_count} / {session.total_count} students
                   </p>
-                </button>
+                </button>)
               ))}
             </div>
           )}
