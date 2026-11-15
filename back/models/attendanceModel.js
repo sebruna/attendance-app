@@ -43,7 +43,7 @@ export const AttendanceModel = {
     const recordQuery = `
       INSERT INTO attendance_records (session_id, student_id, status, marked_by)
       VALUES (?, ?, 'present', 'otp')
-      ON DUPLICATE KEY UPDATE status = 'present', marked_by = 'otp'
+      ON DUPLICATE KEY UPDATE status = 'present', VALUES(marked_by)
     `;
     await pool.query(recordQuery, [session.id, studentId]);
     return { success: true, message: "Attendance marked successfully!" };
@@ -56,8 +56,16 @@ export const AttendanceModel = {
       INSERT INTO attendance_records (session_id, student_id, status, marked_by)
       VALUES ?
       ON DUPLICATE KEY UPDATE 
-        status = IF(marked_by = 'otp' AND status = 'present', status, VALUES(status)),
-        marked_by = IF(marked_by = 'otp' AND status = 'present', marked_by, VALUES(marked_by))
+        status = CASE 
+                   WHEN attendance_records.marked_by = 'otp' AND attendance_records.status = 'present' 
+                   THEN attendance_records.status 
+                   ELSE VALUES(status) 
+                 END,
+        marked_by = CASE 
+                      WHEN attendance_records.marked_by = 'otp' AND attendance_records.status = 'present' 
+                      THEN attendance_records.marked_by 
+                      ELSE VALUES(marked_by) 
+                    END
     `;
     const [results] = await pool.query(query, [values]);
     return results;
