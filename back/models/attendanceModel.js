@@ -42,22 +42,22 @@ export const AttendanceModel = {
     // Insert or update attendance record as 'present'
     const recordQuery = `
       INSERT INTO attendance_records (session_id, student_id, status, marked_by)
-      VALUES (?, ?, ?, ?)
+      VALUES (?, ?, 'present', 'otp')
       ON DUPLICATE KEY UPDATE status = 'present', marked_by = 'otp'
     `;
-    await pool.query(recordQuery, [session.id, studentId, 'present', 'otp']);
+    await pool.query(recordQuery, [session.id, studentId]);
     return { success: true, message: "Attendance marked successfully!" };
   },
 
   // Bulk upsert attendance records checklist
   async bulkInsertRecords(sessionId, records) {
-    const values = records.map(rec => [sessionId, rec.studentId, rec.status, 'lecturer']);
+    const values = records.map(rec => [sessionId, rec.studentId, rec.status || 'absent', 'lecturer']);
     const query = `
       INSERT INTO attendance_records (session_id, student_id, status, marked_by)
-      VALUES ? AS new
+      VALUES ?
       ON DUPLICATE KEY UPDATE 
-        status = IF(attendance_records.marked_by = 'otp' AND attendance_records.status = 'present', attendance_records.status, new.status),
-        marked_by = IF(attendance_records.marked_by = 'otp' AND attendance_records.status = 'present', attendance_records.marked_by, new.marked_by)
+        status = IF(marked_by = 'otp' AND status = 'present', status, VALUES(status)),
+        marked_by = IF(marked_by = 'otp' AND status = 'present', marked_by, VALUES(marked_by))
     `;
     const [results] = await pool.query(query, [values]);
     return results;
