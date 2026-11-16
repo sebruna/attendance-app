@@ -11,7 +11,6 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 4,
   queueLimit: 0,
-  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: true } : (process.env.NODE_ENV === 'production' ? {} : false),
 });
 
 console.log("💾 MySQL Database Connection Pool initialized.");
